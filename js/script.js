@@ -92,7 +92,7 @@ function appendPageLinks(list){
         });
 };
 const searchBar = document.createElement('input');
-let newUl = document.createElement('ul');
+const pageHeader = document.querySelector('div.page-header');
 function search (list){
    
    searchBar.placeholder = 'Search for students...';
@@ -100,38 +100,52 @@ function search (list){
    const searchButton = document.createElement('button');
    searchButton.textContent = 'Search';
    searchButton.className = 'student-search';
-   const pageHeader = document.querySelector('div.page-header');
    pageHeader.appendChild(searchButton);
    pageHeader.appendChild(searchBar);
 
    searchBar.addEventListener('keyup', (e) => {
       e.onkeyup = liveSearch(list);
    });
-}
 
+  searchButton.addEventListener('click', (e) =>{
+     liveSearch(list);
+  });
+
+}
+let newUl = document.createElement('ul');
+let span = document.createElement('span');
+span.textContent = 'No results found, try again';
+span.className = 'student-search';
 function liveSearch (list){
    newUl = [];
-   const navigation = document.querySelector('div.pagination');
-   let filter, ul, li;
+   let navigation = document.querySelector('div.pagination');
+   let filter, ul, li, h3;
    filter = searchBar.value.toUpperCase();
    ul = document.querySelector('.student-list');
    li = ul.getElementsByTagName('li');
   
    for(let i = 0; i < list.length; i++){
       h3 = li[i].getElementsByTagName('h3')[0].textContent;
+      
       if(h3.toUpperCase().indexOf(filter) > -1){
          li[i].style.display = '';
-         newUl += li[i];
-         console.log(li[i]);
-      } else{
+         newUl.push(li[i]);
+
+      } else {
          li[i].style.display = 'none';
+      } if(h3.includes(searchBar.value) === false){
+         pageHeader.appendChild(span);
       }
-   }
+   }  
+      mainDiv.removeChild(navigation);
+      appendPageLinks(newUl);
+      showPage(newUl, page);
    if(searchBar.value === ''){
       mainDiv.removeChild(navigation);
       appendPageLinks(studentList);
       showPage(studentList, page);
    } 
+
 
 }
 
