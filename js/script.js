@@ -15,25 +15,25 @@ FSJS project 2 - List Filter and Pagination
  const itemsPerPage = 10;
 
 /*** 
-A funciton that by using some basic math calculates the start and
+A function that by using some basic math calculates the start and
 ending index and then uses a for loop to set the display to either empty
 (display) or none. The loop sets this by looping through all of the items
 in the list and then setting the value's to each list item by using
-their index.
+their index. If the items index falls within the range it is displayed,
+if not it is hidden.
 ***/
 function showPage(list, page){
    let startI = (page * itemsPerPage) - itemsPerPage;
    let endI = (page * itemsPerPage);
 
-   for (let i = 0; i < list.length; i++){
-      if(i >= startI && i< endI){
-         list[i].style.display = '';
+      for (let i = 0; i < list.length; i++){
+         if(i >= startI && i< endI){
+            list[i].style.display = '';
+         }
+         else {
+            list[i].style.display = 'none';
+         }
       }
-      else {
-         list[i].style.display = 'none';
-      }
-
-   }
 }
 
 /*** 
@@ -56,9 +56,9 @@ function appendPageLinks(list){
 
 /*
    a for loop  that creates an a element, sets it's href to # (to I
-   believe reload the page), the set's it's text content to the value
+   believe reload the page), then sets it's text content to the value
    of the current index +1. Then an if condition checks to see if the
-   text content is 1 and if it is, the class name is changes to 'active'
+   text content is 1 and if it is, the class name is changed to 'active'
    to apply the already created styles. The a element is then appended
    to the li.
 */
@@ -113,84 +113,93 @@ function appendPageLinks(list){
       // appending the button and searchBar to the pageHeader.
       pageHeader.appendChild(searchButton);
       pageHeader.appendChild(searchBar);
-      let newUl;
-/*
-      Function that updates the li's displayed on the page and stores those 
-      being displayed into the newUL variable.
-*/
-      function getSearchResults(){
-         //Everytime the getSearchResults function runs, it clears the previously stored li's.
-         page = 1;
-         newUl = [];
-         let filter = searchBar.value.toUpperCase();
-         // selecting the ul and li elements with their class and tag names
-         let ul = document.querySelector('.student-list');
-         let li = ul.getElementsByTagName('li');
-         
-         //for loop to display all li's that have the character's entered
-         //or searched in the search bar.
-         //h3 selects all elements with the h3 tag within the li selected above
-         //and then grabs the text content of the first result at index i
-         for(let i = 0; i < list.length; i++){
-            let h3 = li[i].getElementsByTagName('h3')[0].textContent;
-            // if index of returns a match between h3 and searchBar.value then the display is set to ''
-            // if there is no match then the display is set to none, thus hiding the li.
-           if(h3.toUpperCase().indexOf(filter) > -1){
-            li[i].style.display = '';
-            // storing all matches into the just cleared ul variable to use to display
-            // only the search results pagination.
-            newUl.push(li[i]);
-          } else {
-             li[i].style.display = 'none';
-            }          
-         } 
-         if(newUl.length == 0){
-            noResults();
-             } else if(document.getElementById('error-message')){
-               const errorDiv = document.getElementById('error-message');
-               let errorParent = errorDiv.parentNode;
-               errorParent.removeChild(errorDiv);
-             }
-
-         // calling the reappendPages function with the newUl variable and page declared at the beginning
-         reappendPages(newUl,page);
-      }
-/**
- * Selecting the div with class page and the div with class paginatino
- * removing the pagination from the event listeners below are triggered
- * which call the getSearchResults function.
- */
-      function reappendPages(list, page){
-         const pageDiv = document.querySelector('div.page');
-         const pagination = pageDiv.querySelector('div.pagination');  
-         pageDiv.removeChild(pagination);
-         appendPageLinks(list);
-         showPage(list, page);
-      }
-
-      function noResults(){
-         if(document.getElementById('error-message')){
-            return;
-         } else {
-         const errorDiv = document.createElement('div');
-         errorDiv.textContent = 'No results, try again.'
-         errorDiv.ClassName = 'student-search';
-         errorDiv.id = 'error-message';
-         pageHeader.appendChild(errorDiv);
-         }
-      }
-
 
       searchButton.addEventListener('click', (e) => {
-         getSearchResults();
+         getSearchResults(list);
 
       });
 
       searchBar.addEventListener('keyup', (e) => {
-         getSearchResults();
+         getSearchResults(list);
 
       });
 }
+/*
+      Function that updates the li's displayed on the page and stores those 
+      being displayed into the newUL variable.
+*/
+function getSearchResults(list){
+   //Everytime the getSearchResults function runs, it clears the previously stored li's.
+   const searchBar = document.querySelector('input.student-search');
+   page = 1;
+   let newUl = [];
+   let filter = searchBar.value.toUpperCase();
+   // selecting the ul and li elements with their class and tag names
+   let ul = document.querySelector('.student-list');
+   let li = ul.getElementsByTagName('li');
+   
+   /*
+      for loop to display all li's that have the character's entered
+      or searched in the search bar.
+      h3 selects all elements with the h3 tag within the li selected above
+      and then grabs the text content of the first result at index i
+      */
+
+   for(let i = 0; i < list.length; i++){
+      let h3 = li[i].getElementsByTagName('h3')[0].textContent;
+      // if indexOf returns a match between h3 and searchBar.value then the display is set to ''
+      // if there is no match then the display is set to none, thus hiding the li.
+         if(h3.toUpperCase().indexOf(filter) > -1){
+            li[i].style.display = '';
+            // storing all matches into the just cleared ul variable to use to display
+            // the search results pagination.
+            newUl.push(li[i]);
+      } else {
+         li[i].style.display = 'none';
+         }          
+      } 
+   // once newUl has a length of 0 an error will be appended to the page.
+   // letting the user know there are no results by calling the noResults function
+   if(newUl.length == 0){
+      noResults();
+   // if the error message is on the page, remove it when newUl != 0.
+   // remove it by selecting it and then it's parent and then removing child.
+       } else if(document.getElementById('error-message')){
+         const errorDiv = document.getElementById('error-message');
+         let errorParent = errorDiv.parentNode;
+         errorParent.removeChild(errorDiv);
+       }
+
+   // calling the reappendPages function with the newUl variable and page declared at the beginning
+   reappendPages(newUl,page);
+}
+/**
+* Selecting the div with class page and the div with class paginatino
+* removing the pagination from the event listeners below are triggered
+* which call the getSearchResults function.
+*/
+function reappendPages(list, page){
+   const pageDiv = document.querySelector('div.page');
+   const pagination = pageDiv.querySelector('div.pagination');  
+   pageDiv.removeChild(pagination);
+   appendPageLinks(list);
+   showPage(list, page);
+}
+
+function noResults(){
+   const pageHeader = document.querySelector('div.page');
+   if(document.getElementById('error-message')){
+      return;
+   } else {
+   const errorDiv = document.createElement('div');
+   errorDiv.textContent = 'No results, try again.'
+   errorDiv.ClassName = 'student-search';
+   errorDiv.id = 'error-message';
+   pageHeader.appendChild(errorDiv);
+   }
+}
+
+
 
 appendPageLinks(studentList);
 showPage(studentList, page);
