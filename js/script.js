@@ -115,17 +115,17 @@ function search (list){
 let newUl = document.createElement('ul');
 let span = document.createElement('span');
 span.textContent = 'No results found, try again';
-span.className = 'student-search';
+pageHeader.appendChild(span);
+span.style.display = 'none';
 function liveSearch (list){
    newUl = [];
    let navigation = document.querySelector('div.pagination');
-   let filter, ul, li, h3;
-   filter = searchBar.value.toUpperCase();
-   ul = document.querySelector('.student-list');
-   li = ul.getElementsByTagName('li');
+   let filter = searchBar.value.toUpperCase();
+   let  ul = document.querySelector('.student-list');
+   let li = ul.getElementsByTagName('li');
   
    for(let i = 0; i < list.length; i++){
-      h3 = li[i].getElementsByTagName('h3')[0].textContent;
+      let h3 = li[i].getElementsByTagName('h3')[0].textContent;
       
       if(h3.toUpperCase().indexOf(filter) > -1){
          li[i].style.display = '';
@@ -133,10 +133,13 @@ function liveSearch (list){
 
       } else {
          li[i].style.display = 'none';
-      } if(h3.includes(searchBar.value) === false){
-         pageHeader.appendChild(span);
-      }
+      } 
    }  
+      if(newUl.length == 0){
+         span.style.display = '';
+      }else {
+         span.style.display = 'none';
+      }
       mainDiv.removeChild(navigation);
       appendPageLinks(newUl);
       showPage(newUl, page);
@@ -144,6 +147,7 @@ function liveSearch (list){
       mainDiv.removeChild(navigation);
       appendPageLinks(studentList);
       showPage(studentList, page);
+      span.textContent = '';
    } 
 
 
