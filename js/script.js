@@ -42,16 +42,13 @@ const pageItems = 10;
 function showPage(list, page){
    const startIndex = (page * pageItems) - pageItems;
    const endIndex = page * pageItems;
-   let j = startIndex;
 
    for(let i = 0; i < list.length; i++){
       if(i >= startIndex && i <  endIndex){
-         studentList[i].style.display = '';
-         console.log(j);
-         j++;
+         list[i].style.display = '';
          
       } else {
-         studentList[i].style.display = 'none';
+         list[i].style.display = 'none';
       }
 
    }
@@ -63,11 +60,11 @@ function showPage(list, page){
    functionality to the pagination buttons.
 ***/
 
+const mainDiv = document.querySelector('div.page');
 function appendPageLinks(list){
    let pageNumber = (list.length/10);
-   const pDiv = document.createElement('div');
+   let pDiv = document.createElement('div');
    pDiv.className = 'pagination';
-   const mainDiv = document.querySelector('div.page');
    mainDiv.appendChild(pDiv);
    const ul = document.createElement('ul');
    pDiv.appendChild(ul);
@@ -94,7 +91,51 @@ function appendPageLinks(list){
             }
         });
 };
+const searchBar = document.createElement('input');
+let newUl = document.createElement('ul');
+function search (list){
+   
+   searchBar.placeholder = 'Search for students...';
+   searchBar.className = 'student-search';
+   const searchButton = document.createElement('button');
+   searchButton.textContent = 'Search';
+   searchButton.className = 'student-search';
+   const pageHeader = document.querySelector('div.page-header');
+   pageHeader.appendChild(searchButton);
+   pageHeader.appendChild(searchBar);
 
+   searchBar.addEventListener('keyup', (e) => {
+      e.onkeyup = liveSearch(list);
+   });
+}
+
+function liveSearch (list){
+   newUl = [];
+   const navigation = document.querySelector('div.pagination');
+   let filter, ul, li;
+   filter = searchBar.value.toUpperCase();
+   ul = document.querySelector('.student-list');
+   li = ul.getElementsByTagName('li');
+  
+   for(let i = 0; i < list.length; i++){
+      h3 = li[i].getElementsByTagName('h3')[0].textContent;
+      if(h3.toUpperCase().indexOf(filter) > -1){
+         li[i].style.display = '';
+         newUl += li[i];
+         console.log(li[i]);
+      } else{
+         li[i].style.display = 'none';
+      }
+   }
+   if(searchBar.value === ''){
+      mainDiv.removeChild(navigation);
+      appendPageLinks(studentList);
+      showPage(studentList, page);
+   } 
+
+}
+
+search(studentList);
 appendPageLinks(studentList);
 showPage(studentList, page);
 
