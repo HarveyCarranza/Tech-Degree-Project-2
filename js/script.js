@@ -120,6 +120,7 @@ function appendPageLinks(list){
 */
       function getSearchResults(){
          //Everytime the getSearchResults function runs, it clears the previously stored li's.
+         page = 1;
          newUl = [];
          let filter = searchBar.value.toUpperCase();
          // selecting the ul and li elements with their class and tag names
@@ -168,11 +169,15 @@ function appendPageLinks(list){
       }
 
       function noResults(){
+         if(document.getElementById('error-message')){
+            return;
+         } else {
          const errorDiv = document.createElement('div');
          errorDiv.textContent = 'No results, try again.'
          errorDiv.ClassName = 'student-search';
          errorDiv.id = 'error-message';
          pageHeader.appendChild(errorDiv);
+         }
       }
 
 
