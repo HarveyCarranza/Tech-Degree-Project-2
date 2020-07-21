@@ -6,187 +6,156 @@ FSJS project 2 - List Filter and Pagination
 // Study guide for this project - https://drive.google.com/file/d/1OD1diUsTMdpfMDv677TfL1xO2CEkykSz/view?usp=sharing
 
 
-// Selecting the Li with the class student-item
- const studentList = document.querySelectorAll('li.student-item');
- // setting my initial page number to 1 so it will display page one 
- // upon the initial call
- let page = 1;
- // setting the items per page to 10
- const itemsPerPage = 10;
+/*** 
+   Add your global variables that store the DOM elements you will 
+   need to reference and/or manipulate. 
+   
+   But be mindful of which variables should be global and which 
+   should be locally scoped to one of the two main functions you're 
+   going to create. A good general rule of thumb is if the variable 
+   will only be used inside of a function, then it can be locally 
+   scoped to that function.
+***/
+
+/*** Selecting the elements with the class "student-item" and declaring them 
+ * to the studentList variable
+ */
+const studentList = document.getElementsByClassName("student-item");
+let page = 1;
+const pageItems = 10;
 
 /*** 
-A funciton that by using some basic math calculates the start and
-ending index and then uses a for loop to set the display to either empty
-(display) or none. The loop sets this by looping through all of the items
-in the list and then setting the value's to each list item by using
-their index.
-***/
-function showPage(list, page){
-   let startI = (page * itemsPerPage) - itemsPerPage;
-   let endI = (page * itemsPerPage);
+   Create the `showPage` function to hide all of the items in the 
+   list except for the ten you want to show.
 
-   for (let i = 0; i < list.length; i++){
-      if(i >= startI && i< endI){
+   Pro Tips: 
+     - Keep in mind that with a list of 54 students, the last page 
+       will only display four.
+     - Remember that the first student has an index of 0.
+     - Remember that a function `parameter` goes in the parens when 
+       you initially define the function, and it acts as a variable 
+       or a placeholder to represent the actual function `argument` 
+       that will be passed into the parens later when you call or 
+       "invoke" the function 
+***/
+
+function showPage(list, page){
+   const startIndex = (page * pageItems) - pageItems;
+   const endIndex = page * pageItems;
+
+   for(let i = 0; i < list.length; i++){
+      if(i >= startIndex && i <  endIndex){
          list[i].style.display = '';
-      }
-      else {
+         
+      } else {
          list[i].style.display = 'none';
       }
 
    }
 }
 
+
 /*** 
-The appendPageLinks function adds the pagination links to the div with
-the page class. it selects the div with the page class, then creates the
-new div called pagination, sets the div's class to 'pagination' so that
-the already set up style can take effect. It is then appended to the 
-earlier selected div.
+   Create the `appendPageLinks function` to generate, append, and add 
+   functionality to the pagination buttons.
 ***/
 
+const mainDiv = document.querySelector('div.page');
 function appendPageLinks(list){
-   const pageDiv = document.querySelector('div.page');
-   const pagination = document.createElement('div');
-   pagination.className = 'pagination';
-   pageDiv.appendChild(pagination);
-   // create a variable to store the total number of pages
-   // by dividing the length of the list by the total items per page (10)
-   let totalPages = list.length / itemsPerPage;
-   const li = document.createElement('li');
-
-/*
-   a for loop  that creates an a element, sets it's href to # (to I
-   believe reload the page), the set's it's text content to the value
-   of the current index +1. Then an if condition checks to see if the
-   text content is 1 and if it is, the class name is changes to 'active'
-   to apply the already created styles. The a element is then appended
-   to the li.
-*/
-
-   for(let i = 0; i < totalPages; i++){
+   let pageNumber = (list.length/10);
+   let pDiv = document.createElement('div');
+   pDiv.className = 'pagination';
+   mainDiv.appendChild(pDiv);
+   const ul = document.createElement('ul');
+   pDiv.appendChild(ul);
+   for(let i = 0; i < pageNumber; i++){
+      const li = document.createElement('li');
       const a = document.createElement('a');
       a.href = '#';
       a.textContent = (i+1);
-      if(a.textContent == 1){
-         a.className = 'active';
-      }
       li.appendChild(a);
+      ul.appendChild(li);
    }
-   /*
-   Once the loop has been completed the li with all of the pagination links
-   is added to the pagination div.
-   */
-
-   pagination.appendChild(li);
-   const a = li.querySelectorAll('a');
-
-/*
-   an event listener is added to the pagination div that is listening for clicks
-   once the pagination link is clicked, the class is wiped from all of the a's
-   and then applied to the event target.
-*/
-   pagination.addEventListener('click', (e) => {
-      for(let i = 0; i < totalPages; i++){
-         a[i].className = '';
+      const a = document.querySelectorAll("div.pagination a");
+      for(let i = 0; i < a.length; i++){
+         if(a[i].textContent == 1){
+            a[i].className = 'active';
+         }
       }
-      e.target.className = 'active';
-      page = e.target.textContent;
-      showPage(list, page)
+         ul.addEventListener('click', (e) => {
+            for(let i = 0; i < a.length; i++){
+                  a[i].className = '';
+                  let page = e.target.textContent;
+                  e.target.className = 'active';
+                  showPage(list, page);
+            }
+        });
+};
+const searchBar = document.createElement('input');
+const pageHeader = document.querySelector('div.page-header');
+function search (list){
+   
+   searchBar.placeholder = 'Search for students...';
+   searchBar.className = 'student-search';
+   const searchButton = document.createElement('button');
+   searchButton.textContent = 'Search';
+   searchButton.className = 'student-search';
+   pageHeader.appendChild(searchButton);
+   pageHeader.appendChild(searchBar);
+
+   searchBar.addEventListener('keyup', (e) => {
+      e.onkeyup = liveSearch(list);
    });
 
+  searchButton.addEventListener('click', (e) =>{
+     liveSearch(list);
+  });
+
+}
+let newUl = document.createElement('ul');
+let span = document.createElement('span');
+span.textContent = 'No results found, try again';
+pageHeader.appendChild(span);
+span.style.display = 'none';
+function liveSearch (list){
+   newUl = [];
+   let navigation = document.querySelector('div.pagination');
+   let filter = searchBar.value.toUpperCase();
+   let  ul = document.querySelector('.student-list');
+   let li = ul.getElementsByTagName('li');
+  
+   for(let i = 0; i < list.length; i++){
+      let h3 = li[i].getElementsByTagName('h3')[0].textContent;
+      
+      if(h3.toUpperCase().indexOf(filter) > -1){
+         li[i].style.display = '';
+         newUl.push(li[i]);
+
+      } else {
+         li[i].style.display = 'none';
+      } 
+   }  
+      if(newUl.length == 0){
+         span.style.display = '';
+      }else {
+         span.style.display = 'none';
+      }
+      mainDiv.removeChild(navigation);
+      appendPageLinks(newUl);
+      showPage(newUl, page);
+   if(searchBar.value === ''){
+      mainDiv.removeChild(navigation);
+      appendPageLinks(studentList);
+      showPage(studentList, page);
+      span.textContent = '';
+   } 
+
+
 }
 
-/* 
-   Function to search the array of names and display the results dynamically.
-*/
-   function search(list) {
-      // Selecting the div with the class pageheader, and then creating an input element called searchBar.
-      const pageHeader = document.querySelector('div.page-header');
-      const searchBar =  document.createElement('input');
-      // setting the class and placeholder text for searchBar
-      searchBar.className = 'student-search';
-      searchBar.placeholder = 'Search for student...';
-      // creating and setting the class and textcontent for the search bar button.
-      const searchButton = document.createElement('button');
-      searchButton.className = 'student-search';
-      searchButton.textContent = 'Search';
-      // appending the button and searchBar to the pageHeader.
-      pageHeader.appendChild(searchButton);
-      pageHeader.appendChild(searchBar);
-      let newUl;
-/*
-      Function that updates the li's displayed on the page and stores those 
-      being displayed into the newUL variable.
-*/
-      function getSearchResults(){
-         //Everytime the getSearchResults function runs, it clears the previously stored li's.
-         newUl = [];
-         let filter = searchBar.value.toUpperCase();
-         // selecting the ul and li elements with their class and tag names
-         let ul = document.querySelector('.student-list');
-         let li = ul.getElementsByTagName('li');
-         
-         //for loop to display all li's that have the character's entered
-         //or searched in the search bar.
-         //h3 selects all elements with the h3 tag within the li selected above
-         //and then grabs the text content of the first result at index i
-         for(let i = 0; i < list.length; i++){
-            let h3 = li[i].getElementsByTagName('h3')[0].textContent;
-            // if index of returns a match between h3 and searchBar.value then the display is set to ''
-            // if there is no match then the display is set to none, thus hiding the li.
-           if(h3.toUpperCase().indexOf(filter) > -1){
-            li[i].style.display = '';
-            // storing all matches into the just cleared ul variable to use to display
-            // only the search results pagination.
-            newUl.push(li[i]);
-          } else {
-             li[i].style.display = 'none';
-            }          
-         } 
-         if(newUl.length == 0){
-            noResults();
-             } else if(document.getElementById('error-message')){
-               const errorDiv = document.getElementById('error-message');
-               let errorParent = errorDiv.parentNode;
-               errorParent.removeChild(errorDiv);
-             }
-
-         // calling the reappendPages function with the newUl variable and page declared at the beginning
-         reappendPages(newUl,page);
-      }
-/**
- * Selecting the div with class page and the div with class paginatino
- * removing the pagination from the event listeners below are triggered
- * which call the getSearchResults function.
- */
-      function reappendPages(list, page){
-         const pageDiv = document.querySelector('div.page');
-         const pagination = pageDiv.querySelector('div.pagination');  
-         pageDiv.removeChild(pagination);
-         appendPageLinks(list);
-         showPage(list, page);
-      }
-
-      function noResults(){
-         const errorDiv = document.createElement('div');
-         errorDiv.textContent = 'No results, try again.'
-         errorDiv.ClassName = 'student-search';
-         errorDiv.id = 'error-message';
-         pageHeader.appendChild(errorDiv);
-      }
-
-
-      searchButton.addEventListener('click', (e) => {
-         getSearchResults();
-
-      });
-
-      searchBar.addEventListener('keyup', (e) => {
-         getSearchResults();
-
-      });
-}
-
+search(studentList);
 appendPageLinks(studentList);
 showPage(studentList, page);
-search(studentList);
+
+
+// Remember to delete the comments that came with this file, and replace them with your own code comments.
