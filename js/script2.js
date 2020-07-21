@@ -24,7 +24,6 @@ their index.
 function showPage(list, page){
    let startI = (page * itemsPerPage) - itemsPerPage;
    let endI = (page * itemsPerPage);
-   console.log(endI)
 
    for (let i = 0; i < list.length; i++){
       if(i >= startI && i< endI){
@@ -114,13 +113,14 @@ function appendPageLinks(list){
       // appending the button and searchBar to the pageHeader.
       pageHeader.appendChild(searchButton);
       pageHeader.appendChild(searchBar);
+      let newUl;
 /*
       Function that updates the li's displayed on the page and stores those 
       being displayed into the newUL variable.
 */
       function getSearchResults(){
          //Everytime the getSearchResults function runs, it clears the previously stored li's.
-         let newUl = [];
+         newUl = [];
          let filter = searchBar.value.toUpperCase();
          // selecting the ul and li elements with their class and tag names
          let ul = document.querySelector('.student-list');
@@ -141,8 +141,16 @@ function appendPageLinks(list){
             newUl.push(li[i]);
           } else {
              li[i].style.display = 'none';
-          }  
+            }          
          } 
+         if(newUl.length == 0){
+            noResults();
+             } else if(document.getElementById('error-message')){
+               const errorDiv = document.getElementById('error-message');
+               let errorParent = errorDiv.parentNode;
+               errorParent.removeChild(errorDiv);
+             }
+
          // calling the reappendPages function with the newUl variable and page declared at the beginning
          reappendPages(newUl,page);
       }
@@ -156,8 +164,17 @@ function appendPageLinks(list){
          const pagination = pageDiv.querySelector('div.pagination');  
          pageDiv.removeChild(pagination);
          appendPageLinks(list);
-         showPage(list, page)
+         showPage(list, page);
       }
+
+      function noResults(){
+         const errorDiv = document.createElement('div');
+         errorDiv.textContent = 'No results, try again.'
+         errorDiv.ClassName = 'student-search';
+         errorDiv.id = 'error-message';
+         pageHeader.appendChild(errorDiv);
+      }
+
 
       searchButton.addEventListener('click', (e) => {
          getSearchResults();
@@ -166,6 +183,7 @@ function appendPageLinks(list){
 
       searchBar.addEventListener('keyup', (e) => {
          getSearchResults();
+
       });
 }
 
